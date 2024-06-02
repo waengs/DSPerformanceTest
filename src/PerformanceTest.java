@@ -8,6 +8,7 @@ class PerformanceTest {
     private static final int NUM_USERS = 100000;
     private static final int NUM_DRINKS = 1000;
     private static final int NUM_CART_ITEMS = 10000;
+    private static final int NUM_UPDATES = 10000;
     private static Random random = new Random();
 
     public static void main(String[] args) {
@@ -34,6 +35,9 @@ class PerformanceTest {
         long hashMapAddCartItemsTime = populateCartItems(cartHashMap, drinkHashMap);
         long arrayListAddCartItemsTime = populateCartItems(cartArrayList, drinkArrayList);
 
+        long hashMapUpdateCountersTime = updateCounters(drinkHashMap, NUM_UPDATES);
+        long arrayListUpdateCountersTime = updateCounters(drinkArrayList, NUM_UPDATES);
+
         System.out.println("HashMap add users time: " + hashMapAddUsersTime + " ms");
         System.out.println("ArrayList add users time: " + arrayListAddUsersTime + " ms");
 
@@ -45,6 +49,9 @@ class PerformanceTest {
 
         System.out.println("HashMap add cart items time: " + hashMapAddCartItemsTime + " ms");
         System.out.println("ArrayList add cart items time: " + arrayListAddCartItemsTime + " ms");
+
+        System.out.println("HashMap update counters time: " + hashMapUpdateCountersTime + " ms");
+        System.out.println("ArrayList update counters time: " + arrayListUpdateCountersTime + " ms");
     }
 
     private static long populateUsers(Map<String, User> userMap) {
@@ -133,6 +140,31 @@ class PerformanceTest {
             String topping = "None";
             double finalPrice = drink.price + (random.nextBoolean() ? 1.0 : 0.0);
             cartList.add(new CartItem(drink, topping, finalPrice));
+        }
+        long end = System.nanoTime();
+        return TimeUnit.NANOSECONDS.toMillis(end - start);
+    }
+
+    private static long updateCounters(Map<String, Drink> drinkMap, int numUpdates) {
+        long start = System.nanoTime();
+        for (int i = 0; i < numUpdates; i++) {
+            String drinkName = "Drink" + random.nextInt(NUM_DRINKS);
+            Drink drink = drinkMap.get(drinkName);
+            if (drink != null) {
+                drink.purchaseCount++;
+                drink.addPurchase("Topping" + random.nextInt(10));
+            }
+        }
+        long end = System.nanoTime();
+        return TimeUnit.NANOSECONDS.toMillis(end - start);
+    }
+
+    private static long updateCounters(ArrayList<Drink> drinkList, int numUpdates) {
+        long start = System.nanoTime();
+        for (int i = 0; i < numUpdates; i++) {
+            Drink drink = drinkList.get(random.nextInt(NUM_DRINKS));
+            drink.purchaseCount++;
+            drink.addPurchase("Topping" + random.nextInt(10));
         }
         long end = System.nanoTime();
         return TimeUnit.NANOSECONDS.toMillis(end - start);
